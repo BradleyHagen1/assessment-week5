@@ -3,7 +3,7 @@ const { CONNECTION_STRING } = process.env;
 
 const Sequelize = require("sequelize");
 
-console.log(CONNECTION_STRING);
+// console.log();
 
 const sequelize = new Sequelize("db-connection", CONNECTION_STRING, null, {
   dialect: "postgres",
@@ -17,8 +17,7 @@ const sequelize = new Sequelize("db-connection", CONNECTION_STRING, null, {
 module.exports = {
   seed: (req, res) => {
     sequelize
-      .query(
-        `
+      .query(`
             drop table if exists cities;
             drop table if exists countries;
 
