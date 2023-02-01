@@ -3,7 +3,7 @@ const { CONNECTION_STRING } = process.env;
 
 const Sequelize = require("sequelize");
 
-// console.log();
+
 
 const sequelize = new Sequelize(CONNECTION_STRING, {
   dialect: "postgres",
