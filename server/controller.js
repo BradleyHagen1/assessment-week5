@@ -5,7 +5,7 @@ const Sequelize = require("sequelize");
 
 // console.log();
 
-const sequelize = new Sequelize("db-connection", CONNECTION_STRING, null, {
+const sequelize = new Sequelize(CONNECTION_STRING, {
   dialect: "postgres",
   dialectOptions: {
     ssl: {
@@ -15,9 +15,44 @@ const sequelize = new Sequelize("db-connection", CONNECTION_STRING, null, {
 });
 
 module.exports = {
+  getCountries: (req, res) => {
+    sequelize.query(`
+    SELECT * FROM countries;`)
+      .then((dbRes) => res.status(200).send(dbRes[0]))
+      .catch((err) => console.log(err));
+  },
+
+  createCity: (req, res) => {
+    const {name, rating, countryId} = req.body;
+    sequelize.query(`
+    INSERT INTO cities (name, rating, country_id)
+    VALUES('${name}', ${rating}, ${countryId});`)
+    .then((dbRes) => res.status(200).send(dbRes[0]))
+    .catch((err) => console.log(err));
+  },
+  
+  getCities: (req, res) => {
+    sequelize.query(`
+    SELECT ci.city_id, ci.name AS city, ci.rating, co.country_id, co.name AS country FROM cities AS ci
+    JOIN countries AS co
+    ON ci.country_id = co.country_id;`)
+    .then((dbRes) => res.status(200).send(dbRes[0]))
+    .catch((err) => console.log(err));
+  },
+
+  deleteCity: (req, res) => {
+    const {id} = req.params;
+    sequelize.query(`
+    DELETE FROM cities
+    WHERE city_id = ${id};`)
+    .then((dbRes) => res.status(200).send(dbRes[0]))
+    .catch((err) => console.log(err));
+  },
+
   seed: (req, res) => {
     sequelize
-      .query(`
+      .query(
+        `
             drop table if exists cities;
             drop table if exists countries;
 
@@ -25,6 +60,14 @@ module.exports = {
                 country_id serial primary key, 
                 name varchar
             );
+
+            CREATE TABLE cities 
+            (city_id SERIAL PRIMARY KEY,
+            name VARCHAR(70),
+            rating INTEGER,
+            country_id INTEGER NOT NULL REFERENCES countries(country_id)
+            );
+
 
             insert into countries (name)
             values ('Afghanistan'),
@@ -223,12 +266,7 @@ module.exports = {
             ('Zambia'),
             ('Zimbabwe');
 
-            CREATE TABLE cities 
-            (city_id SERIAL PRIMARY KEY,
-            name VARCHAR(70),
-            rating INTEGER,
-            country_id INTEGER
-            );
+
 
 
         `
